@@ -2,6 +2,8 @@ package com.company;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -11,41 +13,39 @@ import java.util.stream.Collectors;
 public class Bayes {
 
     private List<Mail> ham = new ArrayList<>();
+    private List<Mail> spam = new ArrayList<>();
 
-    public Bayes (){
-
-        // get all files in the folder
-        final File folder = new File("../resources/data/hamAnlernen");
-        final List<File> fileList = Arrays.asList(folder.listFiles());
-
-        for (int i = 0; i < fileList.size()-1; i++) {
-            for (String line : readFromFile(fileList.get(i).getPath())) {
-                for (String word : line.split(" ")){
-                    ham.get(i).addWord(word);
+    public Bayes() {
+        try {
+            // get all files in the folder
+            final File folder = new File("hamAnlernen");
+            final List<File> fileList = Arrays.asList(folder.listFiles());
+            //read all mails
+            for (File file : fileList) {
+                Mail mail = new Mail();
+                //read all lines
+                for (String line : readFromFile(file.getPath())) {
+                    for (String word : line.split(" ")) {
+                        mail.addWord(word);
+                    }
                 }
+                ham.add(mail);
             }
-        }
 
-    }
 
-    private List<String> readFromFile(String fileName) {
-        try (BufferedReader reader = getReader(fileName)) {
-            return reader.lines()
-                    .collect(Collectors.toList());
-        } catch (IOException e) {
-            throw new IllegalStateException("failed");
+        } catch (IOException f) {
         }
     }
 
-    private BufferedReader getReader(String fileName) {
-        InputStream inputStream = getClass().getResourceAsStream(fileName);  // damit kann man vom File lesen
-        InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8); // lesen von Text-File
-        return new BufferedReader(reader);  // damit man zeilenweise lesen kann
+    private List<String> readFromFile(String fileName) throws IOException {
+        return Files.readAllLines(Paths.get(fileName));
     }
 
-    public List<Mail> getMailList(){
+    public List<Mail> getMailList() {
         return ham;
     }
+
+
 
 }
 
